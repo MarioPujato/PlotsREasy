@@ -1,0 +1,17 @@
+lib/beeRandom.mod
+lib/beeSwarm.mod
+lib/boxPlot.mod
+lib/cTree.mod
+lib/corMatrix.mod
+lib/heatMap.mod
+lib/histogram.mod
+lib/horizontalBar.mod
+lib/pca.mod
+lib/pieChart.mod
+lib/scatter.mod
+lib/scatterLab.mod
+lib/vennDiagram.mod
+lib/verticalBar.mod
+lib/violin.mod
+lib/volcano.mod
+lib/wordCloud.mod

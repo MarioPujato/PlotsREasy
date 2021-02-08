@@ -1,0 +1,334 @@
+#!/usr/bin/env Rscript
+# Turn warnings off globaly
+options( warn = -1 )
+
+data_file  = DATA_FILE
+color_file = COLOR_FILE
+
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+data_table = read.table( data_file, header = T, sep = "\t", check.names = F )
+names      = colnames( data_table )
+
+# Extract data
+y_labels   = as.vector( data_table[,1] )
+y_labels   = gsub( ":n:", "\n", y_labels )
+ncol1      = 2
+ncol2      = ( ncol( data_table ) - 1 ) / 2 + 1
+ncol3      = ncol2 + 1
+ncol4      = ncol( data_table )
+x_data     = as.matrix( data_table[,ncol1:ncol2] )
+x_error    = as.matrix( data_table[,ncol3:ncol4] )
+
+# Write group X labels instead X labels for each bar
+ylabel_group_switch = 'ON'
+if( ylabel_group_switch == 'ON' )
+{
+	y_labels = names[ncol1:ncol2]
+}
+
+# Read in color file
+colors = as.vector( unlist( read.table( color_file, header = F ) ))
+
+# Output file parameters
+plot_format = "jpg"
+plot_res    = 600
+plot_units  = "in"
+plot_width  = 6
+plot_height = 6
+
+out_file = gsub( ".*/", "", data_file )
+out_file = gsub( "\\..*", "", out_file )
+
+if( plot_format == "jpg" )
+{
+	jpeg(
+		paste0(
+			out_file,
+			".",
+			plot_format
+		),
+		family = "Arial",
+		units  = plot_units,
+		res    = plot_res,
+		width  = plot_width,
+		height = plot_height
+	)
+} else if( plot_format == "tif" )
+{
+	tiff(
+		paste0(
+			out_file,
+			".",
+			plot_format
+		),
+		family = "Arial",
+		units  = plot_units,
+		res    = plot_res,
+		width  = plot_width,
+		height = plot_height
+	)
+} else
+{
+	print( paste0( "ERROR: \"", plot_format, "\" is not a valid format\n" ) )
+	quit( "no" )
+}
+
+# Control plot margins and spacing between text lines
+bottom_mar = 1
+left_mar   = 1
+upper_mar  = 1
+right_mar  = 0.1
+
+par(
+	mai = c(
+		bottom_mar,
+		left_mar,
+		upper_mar,
+		right_mar
+	),
+	lheight = 0.8, # Inter-line spacing
+	ljoin   = 1,   # Square lines
+	lend    = 2,   # Square ends in lines
+	xpd     = NA
+)
+
+# Titles all around the plot
+title_switch    = 'ON'
+plot_title      = 'Title'
+plot_x_label    = 'X label'
+title           = gsub( ":n:", "\n", plot_title )
+x_label         = gsub( ":n:", "\n", plot_x_label )
+plot_xlabelsize = 2.0
+plot_ylabelsize = 2.0
+plot_titlesize  = 2.5
+plot_scalesize  = 1.5
+
+if( title_switch == 'OFF' )
+{
+	title = NA
+}
+
+plot_linewidth = 4
+group_columns  = 1
+border_switch  = 'ON'
+border_color   = '#000000'
+border_width   = 1.0
+
+if( border_switch == 'OFF' )
+{
+	border_color = NA # Bar border color
+}
+
+# Set plot limits (defaults to min and max values of X and Y axis)
+xdata_sums = c()
+
+if( group_columns == 0 )
+{
+	for( j in 1:ncol( x_data ) )
+	{
+		xdata_sums = c( xdata_sums, sum( x_data[,j] ))
+	}
+	xmax = max( xdata_sums ) + max( x_error ) / 2
+	xmin = -xmax
+}else
+{
+	xmax = max( x_data ) + max( x_error ) / 2
+	xmin = min( x_data ) - max( x_error ) / 2
+}
+xmin = xmin * 51 / 50
+xmax = xmax * 51 / 50
+
+# Set ymin to zero if all bars have positive values
+if( xmin >= 0 )
+{
+	xmin = 0
+}
+plot_xmin = xmin
+plot_xmax = xmax
+
+# Plot direction
+# 0: stacked columns, 1: grouped columns
+group_columns  = 1
+
+# Set the spacing between bars (number from 0-1 that means a fraction of the bar width)
+bar_spacing = 0
+
+# Graph bar plot
+par( lwd = border_width )
+bar = barplot(
+	x_data,
+	axes      = F,  # Activate/deactivate axis
+	axisnames = F,
+	beside    = group_columns,  # 1: Grouped columns, 0: Stacked columns
+	border    = border_color,   # Bar borders
+	col       = colors,         # Bar colors
+	horiz     = 1, # Activate horizontal bars
+	main      = title,
+	cex.main  = plot_titlesize,
+	space     = bar_spacing,
+	xlim      = c( plot_xmin - xoffset, plot_xmax - xoffset )
+#	xlim      = c( plot_xmin, plot_xmax )
+)
+
+# Error bars
+error_switch    = 'ON'
+error_linewidth = 2.0
+error_length    = 0.05
+
+if( error_switch == 'ON' )
+{
+	if( group_columns == 0 )
+	{
+		for( j in 1:ncol( x_data ) )
+		{
+			x_prev = 0
+
+			for( i in 1:nrow( x_data ) )
+			{
+				arrows(
+					x_data[i,j] + x_prev + x_error[i,j] / 2,
+					bar[j],
+					x_data[i,j] + x_prev - x_error[i,j] / 2,
+					bar[j],
+					angle  = 90,
+					code   = 3,
+					length = error_length,
+					lwd    = error_linewidth
+				)
+				x_prev = x_prev + x_data[i,j]
+			}
+		}
+	}else
+	{
+		arrows(
+			x_data + x_error / 2,
+			bar,
+			x_data - x_error / 2,
+			bar,
+			angle  = 90,
+			code   = 3,
+			length = error_length,
+			lwd    = error_linewidth
+		)
+	}
+}
+
+# Get axis tick positions
+#xlab = pretty(
+#	c( plot_xmin, plot_xmax ),
+#	n = 6,
+#)
+# Remove labels outside of range
+xlab = xlab[xlab<plot_xmax]
+xlab = xlab[xlab>plot_xmin]
+
+# Plot axes
+plot_axiswidth = 4
+
+axis(
+	1,
+#	at       = xlab - xoffset,
+#	at       = xlab,
+#	labels   = xlab,
+	lwd      = plot_axiswidth,
+	las      = 0,
+	cex.axis = plot_scalesize
+)
+
+# Calculate group bar means to position the group labels
+if( ylabel_group_switch == 'ON' )
+{
+	bar_means = c()
+
+	if( group_columns == 0 )
+	{
+		for( j in 1:length( bar ) )
+		{
+			bar_means = c( bar_means, mean( bar[j] ))
+		}
+		bar = bar_means
+	}else
+	{
+		for( j in 1:ncol( bar ) )
+		{
+			bar_means = c( bar_means, mean( bar[,j] ))
+		}
+		bar = bar_means
+	}
+}
+
+# X-axis labels
+plot_xlab_pos = 0.02
+text(
+	grconvertX( 0.50, from = "npc", to = "user" ),
+	grconvertY( plot_xlab_pos, from = "ndc", to = "user" ),
+	adj   = c(0,0.5),
+	label = x_label,
+	srt   = 0,
+	cex   = plot_xlabelsize
+)
+
+# Y-axis label
+plot_ylab_pos = 0.02
+plot_ylab_dir = 0
+ylab_pos_user = grconvertX( plot_ylab_pos, from = "ndc", to = "user" )
+if( ylab_pos_user > 0 )
+{
+	x_adj = 0
+}else
+{
+	x_adj = 1
+}
+text(
+	grconvertX( plot_ylab_pos, from = "ndc", to = "user" ),
+	bar,
+	adj   = c(x_adj,0.5),
+	label = y_labels,
+	srt   = plot_ylab_dir,
+	cex   = plot_ylabelsize
+)
+
+# Add box around plot
+plot_box     = 'ON'
+plot_boxtype = 'o'
+
+if( plot_box == 'ON' )
+{
+	box(
+		which = "plot",
+		bty   = plot_boxtype,
+		lwd   = plot_linewidth
+	)
+}
+
+# Add line at xoffset value
+abline(
+	v   = 0,
+	xpd = F,
+	lty = 1, # 1: solid, 2: dashed, 3: dotted, 4: dotdash, 5: longdash
+	lwd = plot_linewidth / 1.5
+)
+
+# Add legend to have extra control
+legend_switch = 'ON'
+legend_type   = F   # T: horizontal, F: vertical
+legend_size   = 1.5
+legend_xpos   = 0.23
+legend_ypos   = 1.00
+
+if( legend_switch == 'ON' )
+{
+	legend(
+		grconvertX( legend_xpos, from = "ndc", to = "user" ),
+		grconvertY( legend_ypos, from = "ndc", to = "user" ),
+		labels,
+		horiz     = legend_type,
+		fill      = colors,
+		bty       = 'n',         # No box
+		cex       = legend_size, # Text size multiplier
+		x.intersp = 0.5,         # Horizontal spacing
+		y.intersp = 0.9          # Vertical spacing
+	)
+}
+
+quit( "no" )

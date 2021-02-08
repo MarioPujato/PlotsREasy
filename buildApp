@@ -1,0 +1,188 @@
+#!/usr/bin/perl -w
+use strict;
+use Getopt::Std;
+use File::Temp qw/ tempdir /;
+use Data::Dumper;
+
+my $progName = $0;
+$progName    =~ s/^.*\///;
+my $version  = '1.0.0';
+my $created  = '100317';
+my $modified = '080119';
+
+my %options;
+getopts('t:m:', \%options);
+
+# Die with usage if no arguments are provided
+Messages::die_with_usage( $progName, $version, $created, $modified ) unless
+(
+ 	$options{'t'} and
+	$options{'m'}
+);
+Messages::print_options( \%options );
+
+
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+# Create temporary directory
+my $altDir = tempdir( CLEANUP => 1 );
+#my $altDir = tempdir(); # debug
+die "ERROR: Could not create temporary directory $altDir\n"
+	unless -d $altDir;
+
+# Find mods to replace
+my $modIds = find_mod_ids( $options{'t'} );
+
+# Get corresponding mod lines for each modId
+my $modContents = process_mod_files( $options{'m'}, $modIds );
+
+# Build application
+build_application( $options{'t'}, $modContents );
+
+exit;
+
+
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+#-------------------------------------------------------------------------------
+sub find_mod_ids
+{
+	my $file = shift;
+	open( IN, $file ) or
+		die "ERROR: Could not open file $file\n";
+	my @modIds;
+
+	while( my $line = <IN> ){
+		next unless $line =~ /\s*(.*):mod/;
+		push( @modIds, $1 );
+	}
+	close IN;
+
+	return \@modIds;
+}
+
+sub process_mod_files
+{
+	my $files  = shift;
+	my $modIds = shift;
+	my @files  = split( ',', $files );
+	my %modContents;
+	my @modFiles;
+
+	# Get list of file names
+	for my $file ( @files ){
+		open( IN, $file ) or
+			die "ERROR: Could not open file $file\n";
+
+		while( my $modFile = <IN> ){
+			chomp $modFile;
+			next if $modFile =~ /^#|^\s*$/;
+			push( @modFiles, $modFile );
+		}
+		close IN;
+	}
+
+	# Process the files and extract the mod lines
+	for my $modFile ( @modFiles ){
+		print STDERR "Reading $modFile\n";
+
+		# Select text block between [START $modId] and [END $modId]
+		for my $modId ( @$modIds ){
+			open( MOD, $modFile ) or
+				die "ERROR: Could not open mod file $modFile\n";
+			my $contents;
+
+			while( <MOD> ){
+				if( /\[START $modId\]/ .. /\[END $modId\]/ ){
+					my $line = $_;
+					next if $line =~ /\[START|\[END/;
+					$contents .= $line;
+				}
+			}
+			close MOD;
+
+			# Add a comma at the end of the mod lines containing UIPLOT
+			if( $contents ){
+				$modContents{$modId} .=  $contents;
+				$modContents{$modId}  =~ s/\n$/,\n\n/ if $modId =~ /UIPLOT/;
+			}
+		}
+	}
+
+	# Remove the comma at the end of the mod lines containing UIPLOT
+	for my $modId ( @$modIds ){
+		next unless $modId =~ /UIPLOT/;
+		$modContents{$modId} =~ s/,\n\n$/\n/;
+	}
+
+	return \%modContents;
+}
+
+sub build_application
+{
+	my $template    = shift;
+	my $modContents = shift;
+	open( IN, $template ) or
+		die "ERROR: Could not open file $template\n";
+
+	while( my $line = <IN> ){
+		if( $line =~ /\s*(.*):mod/ ){
+			my $modId = $1;
+			print $modContents->{$modId};
+		}
+		else{
+			print $line;
+		}
+	}
+
+	return 0;
+}
+
+#-------------------------------------------------------------------------------
+package Messages;
+use warnings;
+use strict;
+
+sub print_options
+{
+	my $options = shift;
+
+	print STDERR "\e[1mOPTIONS:\e[0m\n";
+	my @sorted = sort{ $a cmp $b } keys %$options;
+
+	for my $var ( @sorted ){
+		my $value = $options->{$var};
+		printf STDERR ( "%s : %-s\n", $var, $value );
+	}
+
+	print STDERR "\n";
+
+	return 1;
+}
+
+sub die_with_usage
+{
+	my $progName = shift;
+	my $version   = shift;
+	my $created   = shift;
+	my $modified  = shift;
+
+	die "
+\e[1;33m--------------------------------------------------------------------------------\e[0m
+
+\e[1;33mUSAGE: $progName [options] <arguments>\e[0m\n
+  [options]
+
+    ARGUMENTS
+      -t  Template file for the shiny application
+      -m  Comma-separated list of files containing lists of module files for each plot category
+
+\e[1;33m--------------------------------------------------------------------------------\e[0m
+
+\e[0;36mDeveloper: Mario Pujato\e[0m
+\e[0;36mVersion:   $version\e[0m
+\e[0;36mCreated:   $created\e[0m
+\e[0;36mModified:  $modified\e[0m
+\n";
+}
+
+1;

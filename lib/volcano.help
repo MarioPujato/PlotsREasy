@@ -1,0 +1,30 @@
+VOCANO PLOT HELP
+
+. Generate volcano plots to visulize gene differential expression data by
+plotting the p-values of the expression difference against the log2 fold
+changes for each gene, coloring those points that are significant below
+a given threshold.
+
+. The data must be a TAB-separated list containing the following fields:
+
+Symbol  log2_fold_changes  -log10_p-value	highlight
+FAM87B   1.40029           9.90349          1
+SAMD11  -0.497723          0.01652          0
+KLHL17   0.122188          0.47650          0
+
+ A header line must be present.
+
+ The fourth column sets genes to be highlighted in the plot. A value of 1 means
+that the particular gene will be highlighted and labeled.
+ The third color available in the color file is used to highlight genes.
+
+. The X,Y thresholds used to color points can be changed within the
+parameter file, under 'pvalue_cutoff' (default = 10) and 'fold_change_cutoff'
+(default = 2)
+
+. Any gene within the X,Y thresholds will be colored using the second available
+color given in the color file
+
+. Also, the names of the gene within the threshold can be written to a file if
+desired. It is turned OFF by default. If ON, the names are written to a file
+named: "volcano_gene_names.txt"

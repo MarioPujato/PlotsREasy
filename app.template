@@ -1,0 +1,119 @@
+suppressMessages(library('shiny'))
+suppressMessages(library('shinyjs'))
+suppressMessages(library('shinythemes'))
+suppressMessages(library('gridExtra'))
+suppressMessages(library('ggrepel'))
+suppressMessages(library('beeswarm'))
+suppressMessages(library('superheat'))
+suppressMessages(library('beeswarm'))
+suppressMessages(library('plotrix'))
+suppressMessages(library('wordcloud'))
+suppressMessages(library('DESeq2'))
+suppressMessages(library('methods'))
+suppressMessages(library('plyr'))
+suppressMessages(library('EnrichedHeatmap'))
+suppressMessages(library('VennDiagram'))
+suppressMessages(library('cowplot'))
+suppressMessages(library('easyGgplot2'))
+suppressMessages(library('grid'))
+suppressMessages(library('gplots'))
+suppressMessages(library('Matrix'))
+suppressMessages(library('colourpicker'))
+options(shiny.maxRequestSize = 50*1024^2)
+
+
+ui = navbarPage(
+	title       = div(img(src="images/PlotsREasy_small_logo.png", height=25), "PlotsREasy"),
+	windowTitle = "PlotsREasy",
+	theme       = shinytheme( "sandstone" ),
+	collapsible = TRUE,
+#	icon        = "images/az_small_logo.png",
+
+	tabPanel( "Home",
+		useShinyjs(), # Include shinyjs
+		tags$body(tags$style(
+			type="text/css", "body {padding-top: 70px; text-align: justify;}"
+		)),
+		fluidRow(
+			column(2),
+			column(8,
+				includeMarkdown( "lib/home.md" ),
+				br(),
+				h3("Choose a plot"),
+				hr(),
+				tags$head(tags$style(
+					HTML("input[type=\"number\"]{ width: 100px;}"),
+					HTML("hr {border-top: 1px solid #DDDDDD;}"),
+					HTML("#homeButtonBRN {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonBRN:hover {opacity:1;}"),
+					HTML("#homeButtonBSW {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonBSW:hover {opacity:1;}"),
+					HTML("#homeButtonBOX {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonBOX:hover {opacity:1;}"),
+					HTML("#homeButtonCTR {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonCTR:hover {opacity:1;}"),
+					HTML("#homeButtonCOR {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonCOR:hover {opacity:1;}"),
+					HTML("#homeButtonHTM {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonHTM:hover {opacity:1;}"),
+					HTML("#homeButtonHIS {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonHIS:hover {opacity:1;}"),
+					HTML("#homeButtonHOR {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonHOR:hover {opacity:1;}"),
+					HTML("#homeButtonPCA {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonPCA:hover {opacity:1;}"),
+					HTML("#homeButtonPIE {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonPIE:hover {opacity:1;}"),
+					HTML("#homeButtonSCA {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonSCA:hover {opacity:1;}"),
+					HTML("#homeButtonSCL {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonSCL:hover {opacity:1;}"),
+					HTML("#homeButtonVEN {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonVEN:hover {opacity:1;}"),
+					HTML("#homeButtonBAR {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonBAR:hover {opacity:1;}"),
+					HTML("#homeButtonVIO {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonVIO:hover {opacity:1;}"),
+					HTML("#homeButtonVLC {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonVLC:hover {opacity:1;}"),
+					HTML("#homeButtonWCL {display:block; height: 10vw; width: 10vw; border-radius: 0%; opacity:0.3;}"),HTML("#homeButtonWCL:hover {opacity:1;}")
+				)),
+				splitLayout(
+					actionButton( "homeButtonBRN", label=NULL, style="background: url('images/BRN_button.png'); background-size: cover; background-position: center;" ),
+					actionButton( "homeButtonBSW", label=NULL, style="background: url('images/BSW_button.png'); background-size: cover; background-position: center;" ),
+					actionButton( "homeButtonBOX", label=NULL, style="background: url('images/BOX_button.png'); background-size: cover; background-position: center;" ),
+					actionButton( "homeButtonCTR", label=NULL, style="background: url('images/CTR_button.png'); background-size: cover; background-position: center;" ),
+					actionButton( "homeButtonCOR", label=NULL, style="background: url('images/COR_button.png'); background-size: cover; background-position: center;" ),
+					actionButton( "homeButtonHTM", label=NULL, style="background: url('images/HTM_button.png'); background-size: cover; background-position: center;" )
+				),
+				br(),
+				splitLayout(
+					actionButton( "homeButtonHIS", label=NULL, style="background: url('images/HIS_button.png'); background-size: cover; background-position: center;" ),
+					actionButton( "homeButtonHOR", label=NULL, style="background: url('images/HOR_button.png'); background-size: cover; background-position: center;" ),
+					actionButton( "homeButtonPCA", label=NULL, style="background: url('images/PCA_button.png'); background-size: cover; background-position: center;" ),
+					actionButton( "homeButtonPIE", label=NULL, style="background: url('images/PIE_button.png'); background-size: cover; background-position: center;" ),
+					actionButton( "homeButtonSCA", label=NULL, style="background: url('images/SCA_button.png'); background-size: cover; background-position: center;" ),
+					actionButton( "homeButtonSCL", label=NULL, style="background: url('images/SCL_button.png'); background-size: cover; background-position: center;" )
+				),
+				br(),
+				splitLayout(
+					actionButton( "homeButtonVEN", label=NULL, style="background: url('images/VEN_button.png'); background-size: cover; background-position: center;" ),
+					actionButton( "homeButtonBAR", label=NULL, style="background: url('images/BAR_button.png'); background-size: cover; background-position: center;" ),
+					actionButton( "homeButtonVIO", label=NULL, style="background: url('images/VIO_button.png'); background-size: cover; background-position: center;" ),
+					actionButton( "homeButtonVLC", label=NULL, style="background: url('images/VLC_button.png'); background-size: cover; background-position: center;" ),
+					actionButton( "homeButtonWCL", label=NULL, style="background: url('images/WCL_button.png'); background-size: cover; background-position: center;" ),
+					""
+				),
+				hr()
+			),
+			column(2)
+		)
+	),
+	navbarMenu( "",
+		UIPLOT:mod
+	),
+	id       = "plotTab",
+	selected = "Home",
+	position = c("fixed-top")
+)
+
+server = function( input, output, session )
+{
+	curDate   = date()
+	sessionId = session$token
+
+	SRVPLOT:mod
+
+	sourcePlot = function( scriptFile, dataFile, colorFile, inPalette ){
+		source( scriptFile, local = T )
+	}
+}
+
+shinyApp(
+	ui     = ui,
+	server = server
+)

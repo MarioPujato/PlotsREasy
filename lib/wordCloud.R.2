@@ -1,0 +1,84 @@
+library(wordcloud2)
+#set.seed(1)
+
+dataTable = read.table( dataFile$datapath, header = T, sep = "\t", check.names = F )
+
+# Get colors for plot
+colors = c()
+	
+if( !is.null( colorFile ) ){
+	# Read in color file
+	colors = as.vector( unlist( read.table( colorFile$datapath, header = F )))
+}else if( !is.null( input$palette011 ) ){
+	# Get colors from multiple selection
+	colors = c()
+
+	for( pattern in input$palette011 ){
+		iColors = readLines( "/Users/ktwc196/Documents/ShinyApps/PlotsREasy/lib/defaultPalettes.txt" )
+		iColors = iColors[grep( paste("^", pattern, "\t", sep=""), iColors )]
+		iColors = as.vector( unlist( strsplit( iColors, "\t" )))
+		iColors = iColors[2:length(iColors)]
+		colors  = c( colors, iColors )
+	}
+}
+
+colorDown = colors[1]
+colorUp   = colors[2]
+colorCen  = colors[3]
+
+if( is.na(colorDown) ){
+	colorDown = '#17193D'
+}
+if( is.na(colorUp) ){
+	colorUp   = '#FBBC22'
+}
+if( is.na(colorCen) ){
+	colorCen  = '#202020'
+}
+vMax      = round( max( dataTable[,2] ) * 10, digits = 0 )
+nValues   = round( dataTable[,2] * 10 + vMax, digits = 0 )
+absValues = abs(dataTable[,2])
+dataTable$ABSVAL = absValues
+dataTable$NVALUE = nValues
+
+palette   = colorRampPalette( c(colorDown, '#FFFCF5', colorUp) )( n = 2 * vMax )
+
+# Add color by matching normalized values
+dataTable$COLOR  = unlist( palette[dataTable$NVALUE] )
+
+# Add center color to center words (words with an original value of zero)
+dataTable$COLOR[dataTable[,2]==0] <- colorCen
+
+# Change the original value of zero to input$centerValue011
+valueCen = input$centerValue011
+if( is.na(input$centerValue011) || input$centerValue011 == 0 ){
+	valueCen = abs(vMax)
+}
+dataTable$ABSVAL[dataTable[,2]==0] = valueCen
+
+sizeMin = input$minSize011 #0.7
+sizeMax = input$maxSize011 #2.5
+
+data = data.frame(dataTable[,1],dataTable$ABSVAL)
+colnames(data) = c('word', 'freq')
+
+wordcloud2(
+	data,
+	fontFamily     = 'Arial',
+	fontWeight     = 'bold',
+	size           = 0.5,
+	shape          = 'diamond', # 'circle', 'diamond' (square), ‘triangle-forward’, ‘triangle’, ‘pentagon’, 'cardioid' and ‘star’
+	minRotation    = -pi/2,
+	maxRotation    = -pi/2,
+	color          = "random-light"
+)
+
+# Title
+title = gsub( ":n:", "\n", input$title011 )
+text(
+	grconvertX( 0.50, from = "ndc", to = "user" ),
+	grconvertY( input$yTitle011, from = "ndc", to = "user" ),
+	adj   = c(0.5,1),
+	label = title,
+	cex   = input$titleSize011
+)

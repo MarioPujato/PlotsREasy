@@ -1,0 +1,4 @@
+legend	cell1	cell2	error1	error2
+ctrl	0.7	0.7	0.03	0.01
+exp1	0.3	0.1	0.04	0.02
+exp2	0.3	0.2	0.01	0.05

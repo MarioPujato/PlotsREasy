@@ -1,0 +1,288 @@
+[START UIPLOT]
+		tabPanel( "Heatmap",
+			sidebarLayout(
+				sidebarPanel(
+					h3("Heatmap"),
+					br(),hr(),
+					h4("Data file:"),
+					fileInput( "dataFileHTM",  NULL, placeholder = "Select data file", accept = c("text/plain", "text/tab-separated-values", ".tsv", ".txt") ),
+					tags$script('$( "#dataFileHTM" ).on( "click", function() { this.value = null; });'),
+					checkboxInput( "exampleHTM", "Load example file", value = F ),
+					br(),hr(),
+					h4("Color Palette:"),
+					uiOutput("plotColorsHTM"),
+					br(),
+					fileInput( "colorFileHTM", NULL, placeholder = "Select file", accept = c("text/plain", "text/tab-separated-values", ".tsv", ".txt") ),
+					tags$script('$( "#colorFileHTM" ).on( "click", function() { this.value = null; });'),
+					uiOutput("paletteSelectorHTM"),
+					br(),hr(),
+					h4("Dimensions:"),
+					splitLayout(
+						numericInput( "widthHTM",  "Witdh",  value = 600, min = 300, max = 2400, step = 50 ),
+						numericInput( "heightHTM", "Height", value = 900, min = 300, max = 2400, step = 50 ),
+						"",""
+					),
+					br(),hr(),
+					h4("Main title and labels:"),
+					textInput( "titleHTM", NULL, placeholder = "Main title here" ),
+					splitLayout(
+						numericInput( "titleSizeHTM",  "Title size", value = 15, min = 1, max = 50, step = 1 ),
+						"","",""
+					),
+					splitLayout(
+						checkboxInput( "labColSwitchHTM", "Display X labels", value = T ),
+						checkboxInput( "labRowSwitchHTM", "Display Y labels", value = F ),
+						"",""
+					),
+					splitLayout(
+						numericInput( "xLabelSizeHTM",  "X font size", value = 5,   min = 0.01, max = 20, step = 0.1 ),
+						numericInput( "yLabelSizeHTM",  "Y font size", value = 5,   min = 0.01, max = 20, step = 0.1 ),
+						numericInput( "xLabelSpaceHTM", "X space",     value = 0.2, min = 0,    max = 10, step = 0.1 ),
+						numericInput( "yLabelSpaceHTM", "Y space",     value = 0.2, min = 0,    max = 10, step = 0.1 )
+					),
+					br(),hr(),
+					h4("Scaling:"),
+					checkboxInput( "linearColorScaleHTM", "Linear color scale", value = F ),
+					br(),
+					h4("Row-normalized values:"),
+					splitLayout(
+						checkboxInput( "trZscoreHTM", "Z-score", value = F ),
+						"","",""
+					),
+					splitLayout(
+						checkboxInput( "trLScaleHTM", "Linear scale", value = F ),
+						numericInput(  "minResHTM",   "Min", value = 0, step = 1 ),
+						numericInput(  "maxResHTM",   "Max", value = 1, step = 1 ),
+						""
+					),
+					br(),hr(),
+					h4("Log values:"),
+					splitLayout(
+						checkboxInput( "logScaleHTM", "Log scaling", value = F ),
+						numericInput(  "logBaseHTM",  "Base", value = 2, step = 1 ),
+						"",""
+					),
+					br(),hr(),
+					h4("Legend:"),
+					splitLayout(
+						numericInput(  "minValueHTM", "Min value", value = NULL, step = 0.1 ),
+						numericInput(  "maxValueHTM", "Max value", value = NULL, step = 0.1 ),
+						checkboxInput( "legSymmHTM",  "Symmetric", value = F ),
+						""
+					),
+					splitLayout(
+						numericInput( "legWidthHTM",  "Width",     value = 1.5,  min = 0.1, max = 20, step = 0.02 ),
+						numericInput( "legHeightHTM", "Height",    value = 0.15, min = 0.1, max = 20, step = 0.02 ),
+						numericInput( "legSizeHTM",   "Font size", value = 16,   min = 0.1, max = 50, step = 1 ),
+						""
+					),
+					br(),hr(),
+					h4("Dendrograms:"),
+					splitLayout(
+						checkboxInput( "rowDendroHTM", "Show row tree",    value = F ),
+						checkboxInput( "colDendroHTM", "Show column tree", value = F ),
+						"",""
+					),
+					splitLayout(
+						checkboxInput( "rowReorderHTM", "Reorder rows",    value = F ),
+						checkboxInput( "colReorderHTM", "Reorder columns", value = F ),
+						"",""
+					),
+					br(),hr(),
+					h4("Cells and grid:"),
+					splitLayout(
+						numericInput(  "gridHWidthHTM", "V width",     value = NULL, min = 0.1, max = 10, step = 0.1 ),
+						numericInput(  "gridVWidthHTM", "H width",     value = NULL, min = 0.1, max = 10, step = 0.1 ),
+						checkboxInput( "cellDataHTM",  "Show cell data", value = F ),
+						""
+					)
+				),
+
+				mainPanel(
+					tags$style(HTML("#plotHTM{ height: 70vh; width: 100vh; overflow: auto }")),
+					fixedPanel(
+						tabsetPanel(
+							tabPanel( "Plot",
+								br(),
+								splitLayout(
+									cellWidths = c(80,110),
+									actionButton( "goButtonHTM", "Plot"),
+									downloadButton( "downloadPlotHTM", "Save Plot")
+								),
+								hr(),
+								uiOutput("plotHTM")
+							),
+							tabPanel( "Instructions",
+								br(),
+								includeMarkdown( "lib/core.md" ),
+								br(),
+								includeMarkdown( "lib/heatMap.md" )
+							)
+						)
+					)
+				)
+			)
+		)
+[END UIPLOT]
+
+[START SRVPLOT]
+	observeEvent( input$homeButtonHTM, {
+		showNotification( "Heatmap button pressed", duration=1 )
+		updateNavbarPage( session, "plotTab", selected="Heatmap")
+	})
+
+	valuesHTM = reactiveValues()
+
+	output$tabHTM = renderText({ input$plotTab })
+
+	output$plotHTM = renderUI({
+		plotOutput(
+			"plotOutHTM",
+			width  = input$widthHTM,
+			height = input$heightHTM
+		)
+	})
+
+	output$plotColorsHTM = renderUI({
+		plotOutput(
+			"plotOutColorsHTM",
+			width  = paletteWidthHTM(),
+			height = paletteHeightHTM()
+		)
+	})
+
+	output$plotOutColorsHTM = renderPlot({
+		colorFile = input$colorFileHTM
+		palette   = input$paletteHTM
+		source("lib/colorPalette.R", local = TRUE)
+		valuesHTM$colors = colors
+	})
+
+
+	output$paletteSelectorHTM = renderUI({
+		colorData1 = read.table( "lib/defaultPalettes.txt", header=F, sep="\t", comment.char="", colClasses="character", row.names=1 )
+		mySelected = c( "H7-Blue", "H7-Red", "H7-Yellow", "H7-White" )
+		selections = c()
+		if( !is.null(input$colorFileHTM) ){
+			colorData2 = read.table( input$colorFileHTM$datapath, header=F, sep="\t", comment.char="", colClasses="character", row.names=1 )
+			mySelected = rownames(colorData2)
+			selections = mySelected
+		}
+		selections = c(selections, rownames(colorData1))
+		selectInput( "paletteHTM",
+			"Select colors:",
+			selections,
+			selected = mySelected,
+			multiple = TRUE
+		)
+	})
+
+	output$plotOutHTM = renderPlot({
+		input$goButtonHTM
+		isolate({
+			# Plot data or example
+			colorFile = input$colorFileHTM
+			if( is.null( input$dataFileHTM )){
+				if( input$exampleHTM ){
+					dataFile = "lib/examples/HTM.txt"
+					source("lib/heatMap.R", local = TRUE)
+				}else{
+					return(NULL)
+				}
+			}else{
+				dataFile  = input$dataFileHTM$datapath
+				source("lib/heatMap.R", local = TRUE)
+			}
+		})
+	}, family = "Arial" )
+
+	paletteWidthHTM = function(){
+		# Max number of columns set to 8
+		factor = 72 * 6/16
+		return( round( 8 * factor, digits = 0 ))
+	}
+
+	paletteHeightHTM = function(){
+		colorFile = input$colorFileHTM
+		# Get colors from multiple selection
+		colors = c()
+		if( !is.null( colorFile )){
+			# Read in color file
+			colors = unlist(read.table( input$colorFileHTM$datapath, header=F, sep="\t", comment.char="", colClasses="character", row.names=1 ))
+		}else if( !is.null( input$paletteHTM )){
+			for( pattern in input$paletteHTM ){
+				iColors = readLines( "lib/defaultPalettes.txt" )
+				iColors = iColors[grep( paste("^", pattern, "\t", sep=""), iColors )]
+				iColors = as.vector( unlist( strsplit( iColors, "\t" )))
+				iColors = iColors[2:length(iColors)]
+				colors  = c( colors, iColors )
+			}
+		}
+		# Max number of columns set to 8
+		numColumns = 8
+		numRows    = ceiling( length( colors ) / numColumns )
+		factor     = 72 * 6/16
+		return( round( numRows * factor, digits = 0 ))
+	}
+
+#	observeEvent( input$downloadPlotHTM,{
+#		if( input$downloadPlotHTM>0 ){
+#			shinyjs::disable("goButtonHTM")
+#			shinyjs::disable("downloadPlotHTM")
+#			notifHTM02 <<- showNotification( "Downloading HEATMAP plot ...", duration=60 )
+#
+#			# Generate name for output file
+#			outPath = "/Users/ktwc196/Downloads/"
+#			outFile = "example_HTM"
+#			if( !is.null( input$dataFileHTM )){
+#				outFile = gsub( ".*/", "", input$dataFileHTM )
+#				outFile = gsub( "\\..*", "", outFile )
+#			}
+#			downloadFile$path = paste( outPath, outFile, "_HTM_", Sys.Date(), ".pdf", sep = "" )
+#			write( paste("[Heatmap |",curDate,"|",sessionId,"] PDF file saved to:",downloadFile$path), file=stderr())
+#
+#			# Generate plot in PDF format
+#			cairo_pdf(
+#				downloadFile$path,
+#				width  = dimensionsHTM$width  / 72,
+#				height = dimensionsHTM$height / 72
+#			)
+#
+#			dataFile = "lib/examples/HTM.txt"
+#			if( !is.null( input$dataFileHTM )){
+#				dataFile = input$dataFileHTM$datapath
+#			}
+#			sourcePlot( "lib/heatMap.R", dataFile, input$colorFileHTM, input$paletteHTM )
+#			dev.off()
+#
+#			removeNotification(notifHTM02)
+#			showNotification( "Finished downloading HEATMAP plot", duration=3 )
+#			shinyjs::enable("goButtonHTM")
+#			shinyjs::enable("downloadPlotHTM")
+#		}
+#	})
+
+	output$downloadPlotHTM <- downloadHandler(
+		filename = function(){
+			outFile = "example"
+			if( !is.null( input$dataFileHTM )){
+				outFile = gsub( ".*/", "", input$dataFileHTM )
+				outFile = gsub( "\\..*", "", outFile )
+			}
+			paste( outFile, "_", Sys.Date(), ".pdf", sep = "" )
+		},
+		content = function( file ){
+		cairo_pdf(
+				file,
+				width  = input$widthHTM  / 72,
+				height = input$heightHTM / 72
+			)
+			dataFile = "lib/examples/HTM.txt"
+			if( !is.null( input$dataFileHTM )){
+				dataFile = input$dataFileHTM$datapath
+			}
+			sourcePlot( "lib/heatMap.R", dataFile, input$colorFileHTM, input$paletteHTM )
+			dev.off()
+		}
+	)
+[END SRVPLOT]

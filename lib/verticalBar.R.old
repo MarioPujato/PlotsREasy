@@ -1,0 +1,361 @@
+dataTable = read.table( dataFile, header = T, sep = "\t", check.names = F )
+names     = colnames( dataTable )
+
+# Extract data
+xLabels = as.vector( dataTable[,1] )
+xLabels = gsub( ":n:", "\n", xLabels )
+legend  = xLabels
+ncol1   = 2
+yError  = 0
+
+if( input$errorPresentVER ){
+	# Extract data with error bars
+	ncol2  = ncol( dataTable ) / 2 + 1
+	ncol3  = ncol2 + 1
+	ncol4  = ncol( dataTable ) + 1
+	yData  = as.matrix( dataTable[,ncol1:ncol2] )
+	yError = as.matrix( dataTable[,ncol3:ncol4] )
+}else{
+	# Extract data without error bars
+	ncol2  = ncol( dataTable )
+	yData  = as.matrix( dataTable[,ncol1:ncol2] )
+	ncols  = ncol2-ncol1+1
+	yError = matrix( rep( 0, ncols ), nrow = nrow(yData), ncol = ncols )
+}
+yDataOff = yData
+
+# Apply offset
+if( !is.na(input$yOffsetVER) ){
+	yDataOff[yDataOff>=0] = yDataOff[yDataOff>=0] - input$yOffsetVER
+	yDataOff[yDataOff<0]  = yDataOff[yDataOff<0]  + input$yOffsetVER
+}
+
+# Get colors for plot from multiple selection
+colors = valuesVER$colors
+
+nColors = length(legend)
+colors  = colorRampPalette(colors)( n=nColors )
+
+# Write group X labels instead X labels for each bar
+if( input$groupSwitchVER || input$stackColumnsVER ){
+	xLabels = names[ncol1:ncol2]
+}
+
+# Control plot margins and spacing between text lines
+par(
+	mai = c(
+		input$bottomMarVER,
+		input$leftMarVER,
+		input$upperMarVER,
+		input$rightMarVER
+	),
+	lheight = 0.8, # Inter-line spacing
+	ljoin   = 1,   # Square lines
+	lend    = 2,   # Square ends in lines
+	yaxs    = "i", # Style of Y axis. "r": adds 4% spacing to each side; "i": no spacing added
+	xpd     = NA
+)
+
+# Titles all around the plot
+title   = gsub( ":n:", "\n", input$titleVER )
+y_label = gsub( ":n:", "\n", input$yLabelVER )
+
+border_color  = NA
+if( input$barBordersVER ){
+	border_color = '#000000'
+}
+
+# Set plot limits (defaults to min and max values of X and Y axis)
+stacked = 1
+if( input$stackColumnsVER ){
+	stacked  = 0
+	yStacked = c()
+
+	for( j in 1:ncol( yDataOff )){
+		y_prev = 0
+		for( i in 1:nrow( yDataOff )){
+			yStacked = c( yStacked, yDataOff[i,j] + y_prev + yError[i,j] )
+			y_prev = y_prev + yDataOff[i,j]
+		}
+	}
+	ymax = max( yStacked, na.rm = T )
+	ymin = 0
+}else{
+	ydata = c()
+
+	for( i in 1:nrow( yDataOff )){
+		for( j in 1:ncol( yDataOff )){
+			test = yDataOff[i,j]
+
+			if( is.na( test )){
+				test = 0
+			}
+			if( test >= 0 ){
+				ydata = c( ydata, yDataOff[i,j] + yError[i,j] )
+			}else{
+				ydata = c( ydata, yDataOff[i,j] - yError[i,j] )
+			}
+		}
+	}
+	ymax = max( ydata, na.rm = T )
+	ymin = min( ydata, na.rm = T )
+}
+
+# Add 5% of the range to each side in both dimensions
+yrange = ymax - ymin
+ymax   = ymax + yrange * 0.05
+
+# Set ymin to zero if all bars have positive values
+if( ymin >= 0 ){
+	ymin = 0
+}else{
+	ymin = ymin - yrange * 0.05
+}
+
+if( !is.na(input$yMinVER) ){
+	ymin = input$yMinVER
+}
+if( !is.na(input$yMaxVER) ){
+	ymax = input$yMaxVER
+}
+
+# Graph bar plot
+bar = barplot(
+	yDataOff,
+	axes      = F,  # Activate/deactivate axis
+	axisnames = F,
+	beside    = stacked,  # 1: Grouped columns, 0: Stacked columns
+	border    = border_color,   # Bar borders
+	col       = colors,         # Bar colors
+	horiz     = 0, # Activate horizontal bars
+	main      = title,
+	xpd       = F,
+	cex.main  = input$titleSizeVER,
+	space     = c( input$barSpaceVER, input$groupSpaceVER ),
+	ylim      = c( ymin, ymax )
+)
+
+# Plot axes
+# Y-axis
+yLabPos   = pretty( c( ymin + input$yOffsetVER, ymax + input$yOffsetVER ) )
+yLabels   = yLabPos
+yPositive = yLabPos[yLabPos>=input$yOffsetVER]
+yNegative = rev(-yLabPos[yLabPos>input$yOffsetVER])
+yLabels   = tail( c( yNegative, yPositive ), length(yLabPos) )
+
+par( xpd = F )
+axis(
+	2,
+	lwd      = input$lineWidthVER,
+	at       = yLabPos - input$yOffsetVER,
+	labels   = yLabels,
+	las      = 2,
+	cex.axis = input$scaleSizeVER
+)
+par( xpd = NA )
+
+# X-axis
+# Calculate group bar means to position the group labels
+barPos    = bar
+bar_means = c()
+
+if( !input$stackColumnsVER ){
+	if( input$groupSwitchVER ){
+		for( j in 1:ncol( bar )){
+			bar_means = c( bar_means, mean( bar[,j] ) )
+		}
+		barPos = bar_means
+	}else{
+		for( j in 1:length( bar )){
+			bar_means = c( bar_means, mean( bar[j] ) )
+		}
+		barPos = bar_means
+	}
+}
+
+# X-axis label 1
+xlab_pos_usr = grconvertY( input$xXlabel1VER, from = "ndc", to = "user" )
+# horizontal adj
+y_adj = 0.5
+x_adj = 1
+
+# Vertical adj
+if( input$xLabDirVER == 90 ){
+	y_adj = 1
+	x_adj = 0.5
+
+	if( xlab_pos_usr > ymin ){
+		y_adj = 0
+	}
+}
+xlab_adj = c(y_adj,x_adj)
+
+text(
+	barPos,
+	xlab_pos_usr,
+	adj   = xlab_adj,
+	label = xLabels,
+	srt   = input$xLabDirVER,
+	cex   = input$xLabelSizeVER
+)
+
+# X-axis label 2
+x_label2 = gsub( ":n:", "\n", input$xLabelVER )
+text(
+	grconvertX( 0.50, from = "npc", to = "user" ),
+	grconvertY( input$xXlabel2VER, from = "ndc", to = "user" ),
+	adj   = c(0.5,0),
+	label = x_label2,
+	srt   = 0,
+	cex   = input$xLabelSizeVER
+)
+
+# Y-axis label
+text(
+	grconvertX( input$yYlabelVER, from = "ndc", to = "user" ),
+	grconvertY( 0.50, from = "npc", to = "user" ),
+	adj   = c(0.5,1),
+	label = y_label,
+	srt   = 90,
+	cex   = input$yLabelSizeVER
+)
+
+# Add box around plot
+# "o" (the default), "l", "7", "c", "u", or "]"
+# "n" suppresses the box
+boxtypes = c('n','o','l','7','c','u',']')
+boxtype  = boxtypes[input$boxTypeVER+1]
+
+if( input$boxSwitchVER ){
+	box(
+		which = "plot",
+		bty   = boxtype,
+		lwd   = input$lineWidthVER
+	)
+}
+
+# Error bars
+if( input$errorPresentVER ){
+	par( xpd = F )
+	if( stacked == 0 )	{
+		for( j in 1:ncol( yDataOff )){
+			y_prev = 0
+
+			for( i in 1:nrow( yDataOff )){
+				errorUp   = 0
+				errorDown = 0
+				codeUp    = 0
+				codeDown  = 0
+
+				if( input$errorUpVER ){
+					errorUp   = yError[i,j]
+					codeUp    = 1
+				}
+				if( input$errorDownVER ){
+					errorDown = yError[i,j]
+					codeDown  = 2
+				}
+				errorCode = codeUp + codeDown
+
+				arrows(
+					bar[j],
+					yDataOff[i,j] + y_prev + errorUp,
+					bar[j],
+					yDataOff[i,j] + y_prev - errorDown,
+					angle  = 90,
+					code   = errorCode,
+					length = input$errorLengthVER,
+					lwd    = input$errorWidthVER
+				)
+				y_prev = y_prev + yDataOff[i,j]
+			}
+		}
+	}else{
+		k = 1
+		for( j in 1:ncol( yDataOff )){
+			for( i in 1:nrow( yDataOff )){
+				if( yDataOff[i,j] >= 0 ){
+					errorUp   = 0
+					errorDown = 0
+					codeUp    = 0
+					codeDown  = 0
+
+					if( input$errorUpVER ){
+						errorUp   = yError[i,j]
+						codeUp    = 1
+					}
+					if( input$errorDownVER ){
+						errorDown = yError[i,j]
+						codeDown  = 2
+					}
+					errorCode = codeUp + codeDown
+
+					arrows(
+						bar[k],
+						yDataOff[i,j] + errorUp,
+						bar[k],
+						yDataOff[i,j] - errorDown,
+						angle  = 90,
+						code   = errorCode,
+						length = input$errorLengthVER,
+						lwd    = input$errorWidthVER
+					)
+				}else{
+					errorUp   = 0
+					errorDown = 0
+					codeUp    = 0
+					codeDown  = 0
+
+					if( input$errorUpVER ){
+						errorUp   = yError[i,j]
+						codeUp    = 2
+					}
+					if( input$errorDownVER ){
+						errorDown = yError[i,j]
+						codeDown  = 1
+					}
+					errorCode = codeUp + codeDown
+
+					arrows(
+						bar[k],
+						yDataOff[i,j] + errorDown,
+						bar[k],
+						yDataOff[i,j] - errorUp,
+						angle  = 90,
+						code   = errorCode,
+						length = input$errorLengthVER,
+						lwd    = input$errorWidthVER
+					)
+				}
+				k = k+1
+			}
+		}
+	}
+	par( xpd = NA )
+}
+
+# Add legend to have extra control
+if( input$legendSwitchVER ){
+	legend(
+		grconvertX( input$xLegendVER, from = "ndc", to = "user" ),
+		grconvertY( input$yLegendVER, from = "ndc", to = "user" ),
+		legend,
+		horiz     = input$legendTypeVER, # T: horizontal, F: vertical
+		fill      = colors,
+		bty       = 'n',              # No box
+		cex       = input$legendSizeVER, # Text size multiplier
+		x.intersp = 0.5,              # Horizontal spacing
+		y.intersp = 0.9               # Vertical spacing
+	)
+}
+
+par( xpd = F )
+
+# Add horizontal line to plot
+if( input$switchLineVER ){
+	abline(
+		h   = input$linePositionVER,
+		lwd = input$line2WidthVER, # Line width
+		lty = input$lineTypeVER    # Line type
+	)
+}

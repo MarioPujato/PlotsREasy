@@ -1,0 +1,6 @@
+feature	count
+regionA	10
+regionB	52
+regionC	230
+regionD	87
+regionE	27
