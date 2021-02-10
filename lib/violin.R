@@ -6,57 +6,38 @@
 write( paste("[Violin |",curDate,"|",sessionId,"] Plotting violin using file:",dataFile), file=stderr())
 dataTable = read.table( dataFile, header=T, sep="\t", check.names=F )
 colNames  = colnames( dataTable )
+write( paste("HERE!",colNames), file=stderr() )
 
-# Get colors for plot from multiple selection
-colors  = valuesVIO$colors
-
-nColors = length(colNames)
-if( nColors>1 ){ colors = colorRampPalette(colors)( n=nColors ) }
+# Create factors in dataframe to keep order of labels
+dataTable[,1] = factor( dataTable[,1], levels=unique(dataTable[,1]) )
+dataTable[,2] = factor( dataTable[,2], levels=unique(dataTable[,2]) )
 
 # Variables
-mainTitle  = gsub( ":n:", "\n", input$titleVIO )
+mTitle     = gsub( ":n:", "\n", input$titleVIO )
 mTitleSize = input$titleSizeVIO
-#legendSize = input$legendSizeVIO
-legendSize = 18
+legendSize = input$legendSizeVIO
 lineWidth  = input$lineWidthVIO
 tickWidth  = lineWidth/1.8
 labelSize  = input$labelSizeVIO
 scaleSize  = input$scaleSizeVIO
-axisFace   = input$axisFaceVIO
-upMar      = 0.2
-ymin       = 0
-#ymax       = max(current_gene_data)
+xAngle     = input$xAngleVIO
+xVar       = input$xVarVIO
+yVar       = input$yVarVIO
+gVar       = input$gVarVIO
 
-# Formatting data
-write( paste("[Violin |",curDate,"|",sessionId,"]   Formatting  data for violin"), file=stderr())
-vData  = c()
-vNames = c()
-for( i in 1:length(colNames) ){
-	vData  = c( vData,  dataTable[,i] )
-	vNames = c( vNames, colNames[i] )
-}
-vData = data.frame( values=vData, group=as.character(vNames) )
+# Get colors for plot from multiple selection
+colors  = valuesVIO$colors
+nColors = length(unique(dataTable[,gVar]))
+colors  = colorRampPalette(colors)( n=nColors )
 
 
 # Drawing violin
-#write( paste("[Violin |",curDate,"|",sessionId,"]   Generating violin plot"), file=stderr())
-violin = ggplot( vData, aes( x=group, y=values, fill=group, color=group ) ) +
+violin = ggplot( dataTable, aes_string( x=xVar, y=yVar, fill=gVar ) ) +
 geom_violin( scale='width', na.rm=T, trim=F ) +
-#scale_fill_brewer(palette="Dark2") +
-scale_fill_manual(  values=colors ) +
-scale_color_manual( values=colors ) +
-ggtitle( mainTitle ) +
+scale_fill_manual( values=as.vector(colors) ) +
+labs( title=mTitle ) +
 theme(
-#	legend.title      = element_blank(),
-#	panel.background  = element_blank(),
-#	axis.line.x       = element_line( size=lineWidth, color="black", lineend="square" ),
-#	axis.text.x       = element_text( size=scaleSize, face="plain" ),
-#	plot.title        = element_text( size=mTitleSize, face="bold",  hjust=0.5 ),
-#	axis.title.x      = element_text( size=labelSize,   face="plain", hjust=0.5 ),
-#	axis.title.y      = element_text( size=labelSize,   face="plain", hjust=0.5 ),
-#	plot.margin       = unit( c(upMar,0.1,0.1,0.1), "in" )
-
-#	axis.text.x       = element_text( angle=90, vjust=0.5, hjust=1 ),
+	axis.text.x       = element_text( angle=xAngle, vjust=0.5, hjust=1 ),
 	legend.text       = element_text( size=legendSize ),
 	legend.title      = element_text( size=legendSize*1.2 ),
 	legend.background = element_blank(),
@@ -70,40 +51,11 @@ theme(
 	axis.ticks        = element_line( size=tickWidth ),
 	plot.margin       = unit( c(0.2,0.1,0.1,0.1), "in" )
 )
-#
-#	# Toggle Y axis ON/OFF
-#	if( toggleYaxis ){
-#		violin = violin +
-#		theme(
-#			axis.ticks.length = unit( tickWidth/7, "cm" ),
-#			axis.ticks.x      = element_line( size=tickWidth ),
-#			axis.ticks.y      = element_line( size=tickWidth ),
-#			axis.line.y       = element_line( size=lineWidth, color="black", lineend="square" ),
-#			axis.text.y       = element_text( size=scaleSize, face='plain' )
-#		)
-#	}else{
-#		violin = violin +
-#		theme(
-#			axis.ticks  = element_blank(),
-#			axis.line.y = element_blank(),
-#			axis.text.y = element_blank()
-#		)
-#	}
-#
-#	if( splitSample ){
-#		violin = violin +
-#		scale_fill_manual( values=splitColors )
-#	}else{
-#		violin = violin +
-#		scale_fill_manual( values=c(clustColors,clustColors) )
-#
-#		# Color individual clusters with different color 
-#		if( colorByCluster ){
-#			g = g +
-#			geom_violin( scale='width', mapping=aes( fill=scData$cluster ) )
-#		}
-#	}
-#
-#
+
+if( ! input$legendSwitchVIO ){
+	violin = violin +
+	theme( legend.position = "none" )
+}
+
 print(violin)
 write( paste("[Violin |",curDate,"|",sessionId,"] [ DONE ]"), file=stderr() )

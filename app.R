@@ -1478,8 +1478,8 @@ ui = navbarPage(
 					uiOutput("paletteSelectorBAR"),
 					fileInput( "colorFileBAR", NULL, placeholder = "Select file", accept = c("text/plain", "text/tab-separated-values", ".tsv", ".txt") ),
 					br(),hr(),
+					h4("Dimensions:"),
 					splitLayout(
-						h4("Dimensions:"),
 						numericInput( "widthBAR",  "Witdh",  value = 600, min = 300, max = 2400, step = 50 ),
 						numericInput( "heightBAR", "Height", value = 600, min = 300, max = 2400, step = 50 )
 					),
@@ -1562,90 +1562,55 @@ ui = navbarPage(
 		tabPanel( "Violin",
 			sidebarLayout(
 				sidebarPanel(
-					h3(textOutput("tabVIO")),
+					h3("Violin"),
+					br(),hr(),
+					h4("Data file:"),
+					fileInput( "dataFileVIO",  NULL, placeholder = "Select data file", accept = c("text/plain", "text/tab-separated-values", ".tsv", ".txt") ),
+					tags$script('$( "#dataFileVIO" ).on( "click", function() { this.value = null; });'),
+					checkboxInput( "exampleVIO", "Load example file", value = F ),
+					br(),hr(),
+					h4("Color Palette:"),
+					uiOutput("plotColorsVIO"),
 					br(),
-					tabsetPanel(
-						tabPanel( "Input",
-							br(),
-							h4("Data file:"),
-							fileInput( "dataFileVIO",  NULL, placeholder = "Select data file", accept = c("text/plain", "text/tab-separated-values", ".tsv", ".txt") ),
-							tags$script('$( "#dataFileVIO" ).on( "click", function() { this.value = null; });'),
-							checkboxInput( "exampleVIO", "Load example file", value = F ),
-							br(),
-							hr(),
-							h4("Color Palette:"),
-							uiOutput("plotColorsVIO"),
-							br(),
-							fileInput( "colorFileVIO", NULL, placeholder = "Select file", accept = c("text/plain", "text/tab-separated-values", ".tsv", ".txt") ),
-							tags$script('$( "#colorFileVIO" ).on( "click", function() { this.value = null; });'),
-							uiOutput("paletteSelectorVIO")
-						),
-						tabPanel( "Options",
-							br(),
-							h4("Dimensions:"),
-							splitLayout(
-								numericInput( "widthVIO",  "Witdh",  value = 600, min = 300, max = 2400, step = 50 ),
-								numericInput( "heightVIO", "Height", value = 600, min = 300, max = 2400, step = 50 ),
-								"",""
-							),
-							h4("Main title and labels:"),
-							textInput( "titleVIO",  NULL, placeholder = "Main title here" ),
-							textInput( "xLabelVIO", NULL, placeholder = "log2(Fold Change)" ),
-							textInput( "yLabelVIO", NULL, placeholder = "-log10(FDR)" ),
-							splitLayout(
-								numericInput( "titleSizeVIO", "Title size", value = 35, min = 1, max = 50, step = 1 ),
-								numericInput( "scaleSizeVIO", "Scale size", value = 20, min = 1, max = 50, step = 1 ),
-								numericInput( "labelSizeVIO", "Label size", value = 25, min = 1, max = 50, step = 1 ),
-								""
-							),
-							h4("Plot limits:"),
-							splitLayout(
-								numericInput( "xMinVIO", "X min", value = "NULL", step = 0.01 ),
-								numericInput( "xMaxVIO", "X max", value = "NULL", step = 0.01 ),
-								numericInput( "yMinVIO", "Y min", value = "NULL", step = 0.01 ),
-								numericInput( "yMaxVIO", "Y max", value = "NULL", step = 0.01 )
-							),
-							h4("Cutoffs:"),
-							splitLayout(
-								numericInput( "lfcCutoffVIO",     "min log2(FC)",  value = -2, min = -20, max = 0.1,  step = 0.1 ),
-								numericInput( "rfcCutoffVIO",     "max log2(FC)",  value = 2,  min = 0.1, max = 20,   step = 0.1 ),
-								numericInput( "fdrCutoffVIO",     "-log(FDR)",     value = 2,  min = 1.3, max = 200,  step = 0.1 ),
-								numericInput( "fdrSaturationVIO", "-log(FDR) sat", value = "NULL", min = 0, max = 1000, step = 1 )
-							),
-							h4("Highlight genes:"),
-							splitLayout(
-								checkboxInput( "hGenesVIO",     "Highlight",   value = F ),
-								checkboxInput( "hLabelsVIO",    "Labels",      value = F ),
-								"",""
-							),
-							splitLayout(
-								numericInput(  "hPointSizeVIO", "Symbol Size",    value = 2, min = 0.1, max = 10, step = 0.1 ),
-								numericInput(  "hLabelSizeVIO", "Text Size",      value = 5, min = 0.1, max = 10, step = 0.1 ),
-								numericInput(  "lNudgeXVIO",    "Left position",  value = 5, min = 0,   max = 50, step = 0.2 ),
-								numericInput(  "rNudgeXVIO",    "Right position", value = 5, min = 0,   max = 50, step = 0.2 )
-							),
-							h5("Selection:"),
-							uiOutput( "geneSelectionVIO" ),
-							splitLayout(
-								numericInput( "lfcCutoffHVIO", "min log2(FC)",  value = -2, min = -20, max = 0.1,  step = 0.1 ),
-								numericInput( "rfcCutoffHVIO", "max log2(FC)",  value = 2,  min = 0.1, max = 20,   step = 0.1 ),
-								numericInput( "fdrCutoffHVIO", "-log(FDR)",     value = 2,  min = 1.3, max = 200,  step = 0.1 ),
-								""
-							),
-							h4("Box and symbols:"),
-							splitLayout(
-								checkboxInput( "boxSwitchVIO",  "Box",         value = T ),
-								numericInput(  "lineWidthVIO",  "Line width",  value = 4, min = 0.5, max = 10, step = 0.1 ),
-								numericInput(  "symbolSizeVIO", "Symbol size", value = 2, min = 0.5, max = 10, step = 0.1 ),
-								""
-							)
-						),
-						tabPanel( "Help",
-							br(),
-							includeMarkdown( "lib/core.md" ),
-							br(),
-							includeMarkdown( "lib/violin.md" )
-						)
+					tags$script('$( "#colorFileVIO" ).on( "click", function() { this.value = null; });'),
+					uiOutput("paletteSelectorVIO"),
+					fileInput( "colorFileVIO", NULL, placeholder = "Select file", accept = c("text/plain", "text/tab-separated-values", ".tsv", ".txt") ),
+					br(),
+					h4("Dimensions:"),
+					splitLayout(
+						numericInput( "widthVIO",  "Witdh",  value = 600, min = 300, max = 2400, step = 50 ),
+						numericInput( "heightVIO", "Height", value = 600, min = 300, max = 2400, step = 50 )
+					),
+					h4("Main title and labels:"),
+					textInput( "titleVIO",  NULL, placeholder = "Main title here" ),
+					textInput( "xLabelVIO", NULL, placeholder = "log2(Fold Change)" ),
+					textInput( "yLabelVIO", NULL, placeholder = "-log10(FDR)" ),
+					splitLayout(
+						numericInput( "titleSizeVIO", "Title size",  value = 35, min = 1, max = 50,  step = 1 ),
+						numericInput( "scaleSizeVIO", "Scale size",  value = 20, min = 1, max = 50,  step = 1 ),
+						numericInput( "labelSizeVIO", "Label size",  value = 25, min = 1, max = 50,  step = 1 ),
+						numericInput( "xAngleVIO",    "Label angle", value = 0,  min = 0, max = 180, step = 30 )
+					),
+					h4("Select data to plot:"),
+					uiOutput( "xDataSelVIO" ),
+					uiOutput( "yDataSelVIO" ),
+					uiOutput( "gDataSelVIO" ),
+					h4("Options:"),
+					splitLayout(
+						numericInput(  "lineWidthVIO", "Size", value = 4, min = 0, max = 10, step = 1 ),
+						"","",""
+					),
+					h4("Legend:"),
+					splitLayout(
+						checkboxInput( "legendSwitchVIO", "Legend" ),
+						numericInput(  "legendSizeVIO",   "Size", value = 15, min = 5, max = 50, step = 1 ),
+						"",""
+					),
+					h4("Add horizontal line:"),
+					splitLayout(
+						numericInput( "linePositionVIO", "Y pos", value = 0, min = NA,  max = NA, step = 1 ),
+						numericInput( "line2WidthVIO",   "Width", value = 4, min = 0.5, max = 10, step = 0.1 ),
+						"",""
 					)
 				),
 
@@ -1665,7 +1630,9 @@ ui = navbarPage(
 							),
 							tabPanel( "Log",
 								br(),
-								"Nothing to display"
+								includeMarkdown( "lib/core.md" ),
+								br(),
+								includeMarkdown( "lib/violin.md" )
 							)
 						)
 					)
@@ -3698,7 +3665,24 @@ server = function( input, output, session )
 
 	valuesVIO = reactiveValues()
 
-	output$tabVIO  = renderText({ input$plotTab })
+	observe({
+		dataFile = "lib/examples/VIO.txt"
+		if( ! is.null( input$dataFileVIO )){
+			dataFile = input$dataFileVIO$datapath
+		}
+		dataTable        = read.table( dataFile, header=T, sep="\t", check.names=F, nrows=2 )
+		valuesVIO$header = colnames( dataTable )
+	})
+
+	output$xDataSelVIO = renderUI({
+		selectInput( "xVarVIO", 'X variable',     valuesVIO$header, select=valuesVIO$header[1],  selectize=T )
+	})
+	output$yDataSelVIO = renderUI({
+		selectInput( "yVarVIO", 'Y variable',     valuesVIO$header, select=valuesVIO$header[-1], selectize=T )
+	})
+	output$gDataSelVIO = renderUI({
+		selectInput( "gVarVIO", 'Group variable', valuesVIO$header, select=valuesVIO$header[1],  selectize=T )
+	})
 
 	output$plotVIO = renderUI({
 		plotOutput(
@@ -3718,7 +3702,7 @@ server = function( input, output, session )
 
 	output$paletteSelectorVIO = renderUI({
 		colorData1 = read.table( "lib/defaultPalettes.txt", header=F, sep="\t", comment.char="", colClasses="character", row.names=1 )
-		mySelected = c( "Vc-Gray", "Vc-Green", "Vc-Red" )
+		mySelected = c( "FR-Blue", "FR-Green", "FR-Orange", "FR-Yellow", "FR-Red" )
 		selections = c()
 		if( !is.null(input$colorFileVIO) ){
 			colorData2 = read.table( input$colorFileVIO$datapath, header=F, sep="\t", comment.char="", colClasses="character", row.names=1 )

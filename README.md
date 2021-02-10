@@ -42,3 +42,32 @@ install.packages('ggplot2')
 install.packages('gplots')
 install.packages('Matrix')
 ```
+
+
+### Recreate app.R after you make changes
+
+If you make changes to .mod files or to the app.template file, you would need to recreate the app.R file.  
+It's simple, run buildApp like this:  
+
+```
+./buildApp -t app.template -m mod_files.txt
+```
+
+mod_files.txt contains a list of the .mod files you want to include in the app.  
+For example:  
+```
+lib/beeRandom.mod
+lib/beeSwarm.mod
+lib/boxPlot.mod
+lib/cTree.mod
+lib/corMatrix.mod
+lib/heatMap.mod
+lib/histogram.mod
+```
+
+This program inserts UI and SRV portions of code from the .mod files into the UIPLOT:mod and RVPLOT:mod tags in app.template.  
+
+#### Mod files:
+.mod files contain UI and SRV code corresponding to a single plot.  
+The UI portion is delimited between the [START UIPLOT] and [END UIPLOT] tag lines. This means the UI code needs to start and end with those respective tags.  
+The SRV portion is delimited between the [START SRVPLOT] and [END SRVPLOT] tag lines.  

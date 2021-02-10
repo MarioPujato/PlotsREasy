@@ -17,8 +17,8 @@
 					uiOutput("paletteSelectorBAR"),
 					fileInput( "colorFileBAR", NULL, placeholder = "Select file", accept = c("text/plain", "text/tab-separated-values", ".tsv", ".txt") ),
 					br(),hr(),
+					h4("Dimensions:"),
 					splitLayout(
-						h4("Dimensions:"),
 						numericInput( "widthBAR",  "Witdh",  value = 600, min = 300, max = 2400, step = 50 ),
 						numericInput( "heightBAR", "Height", value = 600, min = 300, max = 2400, step = 50 )
 					),
