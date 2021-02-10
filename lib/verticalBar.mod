@@ -227,7 +227,7 @@
 			paste( outFile, "_", Sys.Date(), ".pdf", sep = "" )
 		},
 		content = function( file ){
-		cairo_pdf(
+			cairo_pdf(
 				file,
 				width  = input$widthBAR  / 72,
 				height = input$heightBAR / 72

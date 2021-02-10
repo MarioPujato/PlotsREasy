@@ -71,3 +71,17 @@ This program inserts UI and SRV portions of code from the .mod files into the UI
 .mod files contain UI and SRV code corresponding to a single plot.  
 The UI portion is delimited between the [START UIPLOT] and [END UIPLOT] tag lines. This means the UI code needs to start and end with those respective tags.  
 The SRV portion is delimited between the [START SRVPLOT] and [END SRVPLOT] tag lines.  
+
+
+### Running from Rstudio
+
+In MAC OS, type:  
+```
+library('shiny')
+options( browser = "/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome")
+runApp("/Users/YOURNAME/ShinyApps/PlotsREasy/app.R", launch.browser=T )
+```
+This will tell Rstudio to open the app in your browser of choice, in this case: google chrome.  
+
+###### NOTE:
+File downloads don't work in Rstudio's built-in browser.  
