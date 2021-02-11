@@ -10,7 +10,6 @@ gVar      = header[1]
 lVar      = header[2]
 xVar      = header[3]
 yVar      = header[4]
-write( paste("vars:",c(gVar,lVar,xVar,yVar)), file=stderr() )
 
 # Get colors for plot from multiple selection
 colors     = valuesSCA$colors
@@ -19,7 +18,6 @@ colors     = head(colors,n=length(colors)-1)
 # Get colors for plot (last colors is for linear regression)
 nColors    = length(unique(dataTable[,gVar]))
 palette    = colorRampPalette( colors )( n=nColors )
-write( paste("Palette:",palette), file=stderr() )
 
 # Main title and axis labels
 mTitle     = gsub( ":n:", "\n", input$titleSCA )

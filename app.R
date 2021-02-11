@@ -1142,86 +1142,73 @@ ui = navbarPage(
 		tabPanel( "Scatter",
 			sidebarLayout(
 				sidebarPanel(
-					h3(textOutput("tabSCA")),
+					h3("Scatter"),
+					br(),hr(),
+					h4("Data file:"),
+					fileInput( "dataFileSCA", NULL, placeholder = "Select data file", accept = c("text/plain", "text/tab-separated-values", ".tsv", ".txt") ),
+					tags$script('$( "#dataFileSCA" ).on( "click", function() { this.value = null; });'),
+					checkboxInput( "exampleSCA", "Load example file", value = F ),
+					br(),hr(),
+					h4("Color Palette:"),
+					uiOutput("plotColorsSCA"),
 					br(),
-					tabsetPanel(
-						tabPanel( "Input",
-							br(),
-							h4("Data file:"),
-							fileInput( "dataFileSCA",  NULL, placeholder = "Select data file", accept = c("text/plain", "text/tab-separated-values", ".tsv", ".txt") ),
-							tags$script('$( "#dataFileSCA" ).on( "click", function() { this.value = null; });'),
-							checkboxInput( "exampleSCA", "Load example file", value = F ),
-							br(),hr(),
-							h4("Color Palette:"),
-							uiOutput("plotColorsSCA"),
-							br(),
-#							fileInput( "colorFileSCA", NULL, placeholder = "Select file", accept = c("text/plain", "text/tab-separated-values", ".tsv", ".txt") ),
-							fileInput( "colorFileSCA", NULL, placeholder = "Select file" ),
-							tags$script('$( "#colorFileSCA" ).on( "click", function() { this.value = null; });'),
-							uiOutput("paletteSelectorSCA")
-						),
-						tabPanel( "Options",
-							br(),
-							h4("Dimensions:"),
-							splitLayout(
-								numericInput( "widthSCA",  "Witdh",  value = 600, min = 300, max = 2400, step = 50 ),
-								numericInput( "heightSCA", "Height", value = 600, min = 300, max = 2400, step = 50 ),
-								"",""
-							),
-							br(),hr(),
-							h4("Titles:"),
-							textInput( "titleSCA",  NULL, placeholder = "Main title here" ),
-							textInput( "xLabelSCA", NULL, placeholder = "X label here" ),
-							textInput( "yLabelSCA", NULL, placeholder = "Y label here" ),
-							splitLayout(
-								numericInput( "titleSizeSCA", "Title size", value = 26, min = 5, max = 50, step = 1 ),
-								numericInput( "labelSizeSCA", "Lab size",   value = 22, min = 5, max = 50, step = 1 ),
-								"",""
-							),
-							br(),hr(),
-							h4("Scales:"),
-							splitLayout(
-								numericInput(  "lineWidthSCA", "Line width", value = 4, min = 0.5, max = 10, step = 0.1 ),
-								numericInput( "scaleSizeSCA", "Scale size",  value = 18, min = 2, max = 30, step = 1 ),
-								checkboxInput( "xLogSCA", "Log X", value = F ),
-								checkboxInput( "yLogSCA", "Log Y", value = F )
-							),
-							br(),hr(),
-							h4("Points:"),
-							splitLayout(
-								numericInput( "pointSizeSCA", "Point Size", value = 5, min = 1, max = 30, step = 1 ),
-								"","",""
-							),
-							splitLayout(
-								checkboxInput( "labelsPresentSCA", "Labels", value = T ),
-								checkboxInput( "showLabelsSCA",    "Show",   value = F ),
-								numericInput(  "textSizeSCA",      "Label Size",   value = 14, min = 2, max = 10, step = 0.1 ),
-								""
-							),
-							br(),hr(),
-							h4("Legend:"),
-							splitLayout(
-								checkboxInput( "showLegendSCA", "Legend", value = F ),
-								numericInput(  "legendSizeSCA", "Size",   value = 15, min = 2, max = 30, step = 1 ),
-								"",""
-							),
-							br(),hr(),
-							h4("Linear fit:"),
-							splitLayout(
-								checkboxInput( "showLinearFitSCA", "Linear", value = F ),
-								numericInput( "xPosEqSCA", "X pos", value = 0,  step = 1 ),
-								numericInput( "yPosEqSCA", "Y pos", value = 0,  step = 1 ),
-								numericInput( "eqSizeSCA", "Size",  value = 14, step = 1 )
-							)
-						),
-						tabPanel( "Help",
-							br(),
-							includeMarkdown( "lib/core.md" ),
-							br(),
-							includeMarkdown( "lib/scatter.md" )
-						)
+					tags$script('$( "#colorFileSCA" ).on( "click", function() { this.value = null; });'),
+					uiOutput("paletteSelectorSCA"),
+					fileInput( "colorFileSCA", NULL, placeholder = "Select file" ),
+					br(),hr(),
+					h4("Dimensions:"),
+					splitLayout(
+						numericInput( "widthSCA",  "Witdh",  value = 600, min = 300, max = 2400, step = 50 ),
+						numericInput( "heightSCA", "Height", value = 600, min = 300, max = 2400, step = 50 ),
+						"",""
+					),
+					br(),hr(),
+					h4("Titles:"),
+					textInput( "titleSCA",  NULL, placeholder = "Main title here" ),
+					textInput( "xLabelSCA", NULL, placeholder = "X label here" ),
+					textInput( "yLabelSCA", NULL, placeholder = "Y label here" ),
+					splitLayout(
+						numericInput( "titleSizeSCA", "Title size", value = 26, min = 5, max = 50, step = 1 ),
+						numericInput( "labelSizeSCA", "Lab size",   value = 22, min = 5, max = 50, step = 1 ),
+						"",""
+					),
+					br(),hr(),
+					h4("Scales:"),
+					splitLayout(
+						numericInput( "lineWidthSCA", "Line width", value = 4,  min = 0.5, max = 10, step = 0.1 ),
+						numericInput( "scaleSizeSCA", "Scale size", value = 18, min = 2,   max = 30, step = 1 ),
+						checkboxInput( "xLogSCA", "Log X", value = F ),
+						checkboxInput( "yLogSCA", "Log Y", value = F )
+					),
+					br(),hr(),
+					h4("Points:"),
+					splitLayout(
+						numericInput( "pointSizeSCA", "Point Size", value = 5, min = 1, max = 30, step = 1 ),
+						"","",""
+					),
+					splitLayout(
+						checkboxInput( "labelsPresentSCA", "Labels", value = T ),
+						checkboxInput( "showLabelsSCA",    "Show",   value = F ),
+						numericInput(  "textSizeSCA",      "Label Size",   value = 14, min = 2, max = 10, step = 0.1 ),
+						""
+					),
+					br(),hr(),
+					h4("Legend:"),
+					splitLayout(
+						checkboxInput( "showLegendSCA", "Legend", value = F ),
+						numericInput(  "legendSizeSCA", "Size",   value = 15, min = 2, max = 30, step = 1 ),
+						"",""
+					),
+					br(),hr(),
+					h4("Linear fit:"),
+					splitLayout(
+						checkboxInput( "showLinearFitSCA", "Linear", value = F ),
+						numericInput( "xPosEqSCA", "X pos", value = 0,  step = 1 ),
+						numericInput( "yPosEqSCA", "Y pos", value = 0,  step = 1 ),
+						numericInput( "eqSizeSCA", "Size",  value = 14, step = 1 )
 					)
 				),
+
 				mainPanel(
 					tags$style(HTML("#plotSCA{ height: 70vh; width: 100vh; overflow: auto }")),
 					fixedPanel(
@@ -1236,9 +1223,11 @@ ui = navbarPage(
 								hr(),
 								uiOutput("plotSCA")
 							),
-							tabPanel( "Log",
+							tabPanel( "Instructions",
 								br(),
-								"Nothing to display"
+								includeMarkdown( "lib/core.md" ),
+								br(),
+								includeMarkdown( "lib/scatter.md" )
 							)
 						)
 					)
@@ -3645,7 +3634,7 @@ server = function( input, output, session )
 			paste( outFile, "_", Sys.Date(), ".pdf", sep = "" )
 		},
 		content = function( file ){
-		cairo_pdf(
+			cairo_pdf(
 				file,
 				width  = input$widthBAR  / 72,
 				height = input$heightBAR / 72
@@ -3783,7 +3772,7 @@ server = function( input, output, session )
 			paste( outFile, "_", Sys.Date(), ".pdf", sep = "" )
 		},
 		content = function( file ){
-		cairo_pdf(
+			cairo_pdf(
 				file,
 				width  = input$widthVIO  / 72,
 				height = input$heightVIO / 72
