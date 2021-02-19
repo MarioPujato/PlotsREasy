@@ -41,9 +41,9 @@
 						"",""
 					),
 					splitLayout(
-						numericInput( "barSpaceBAR",  "Bar space",  value = 0, min = 0,   max = 5,  step = 0.1 ),
-						numericInput( "barWidthBAR",  "Bar width",  value = 1, min = 0,   max = 5,  step = 0.1 ),
-						numericInput( "lineWidthBAR", "Line width", value = 4, min = 0.5, max = 10, step = 0.1 ),
+						numericInput( "groupSpaceBAR", "Group space", value = 0, min = 0,   max = 1,  step = 0.1 ),
+						numericInput( "barSpaceBAR",   "Bar space",   value = 0, min = 0,   max = 1,  step = 0.1 ),
+						numericInput( "lineWidthBAR",  "Line width",  value = 4, min = 0.5, max = 10, step = 0.1 ),
 						""
 					),
 					h4("Error bars:"),

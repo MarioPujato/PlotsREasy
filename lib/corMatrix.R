@@ -7,7 +7,7 @@ colors  = valuesCOR$colors
 
 write( paste("[COR |",curDate,"|",sessionId,"] Computing correlation matrix"), file=stderr() )
 readCounts = as.matrix( read.delim( dataFile, row.names=1, header=T, check.names=F ))
-write( paste("[HERE] ",readCounts), file=stderr() )
+#write( paste("[HERE] ",readCounts), file=stderr() )
 corMatrix  = cor( readCounts, method="pearson", use="complete.obs" )
 
 #heatmap( x=corMatrix, col=colors, symm=T, show_heatmap_legend=T )

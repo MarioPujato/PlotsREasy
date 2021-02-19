@@ -68,7 +68,7 @@
 								hr(),
 								uiOutput("plotVIO")
 							),
-							tabPanel( "Log",
+							tabPanel( "Instructions",
 								br(),
 								includeMarkdown( "lib/core.md" ),
 								br(),

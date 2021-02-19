@@ -5,7 +5,6 @@ lib/cTree.mod
 lib/corMatrix.mod
 lib/heatMap.mod
 lib/histogram.mod
-lib/horizontalBar.mod
 lib/pca.mod
 lib/pieChart.mod
 lib/scatter.mod

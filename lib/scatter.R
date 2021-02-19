@@ -18,6 +18,7 @@ colors     = head(colors,n=length(colors)-1)
 # Get colors for plot (last colors is for linear regression)
 nColors    = length(unique(dataTable[,gVar]))
 palette    = colorRampPalette( colors )( n=nColors )
+write( paste("[SCA]:",palette), file=stderr() )
 
 # Main title and axis labels
 mTitle     = gsub( ":n:", "\n", input$titleSCA )
@@ -31,10 +32,12 @@ scaleSize  = input$scaleSizeSCA
 textSize   = input$textSizeSCA/3
 lineWidth  = input$lineWidthSCA
 tickWidth  = lineWidth / 1.8
+eqSize     = input$eqSizeSCA
+colorAlpha = input$alphaSCA
 
 sca = ggplot( dataTable, aes_string( x=xVar, y=yVar, color=gVar ) ) +
 geom_point( size=pointSize ) +
-scale_color_manual( values=palette ) +
+scale_color_manual( values=alpha(palette,colorAlpha) ) +
 labs(
 	title = mTitle
 )
@@ -77,7 +80,6 @@ if( input$showLegendSCA ){
 # Linear fit
 write( paste("[SCA |",curDate,"|",sessionId,"] Linear fit"), file=stderr() )
 if( input$showLinearFitSCA ){
-	eqSize = 6
 	xPosEq = 0
 	yPosEq = 0
 	if( input$xPosEqSCA ){ xPosEq = input$xPosEqSCA }

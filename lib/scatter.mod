@@ -43,8 +43,9 @@
 					br(),hr(),
 					h4("Points:"),
 					splitLayout(
-						numericInput( "pointSizeSCA", "Point Size", value = 5, min = 1, max = 30, step = 1 ),
-						"","",""
+						numericInput( "pointSizeSCA", "Point Size",   value = 5, min = 1, max = 30, step = 1 ),
+						numericInput( "alphaSCA",     "Transparency", value = 1, min = 0, max = 1,  step = 0.1 ),
+						"",""
 					),
 					splitLayout(
 						checkboxInput( "labelsPresentSCA", "Labels", value = T ),
