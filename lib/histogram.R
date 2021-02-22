@@ -1,133 +1,92 @@
-data_table = read.table( dataFile, header = T, sep = "\t", check.names = F )
-legend     = colnames( data_table )
-# Format data into matrix
-m_data     = as.matrix( data_table )
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+# HIS plot
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+write( paste("[HIS |",curDate,"|",sessionId,"] Scatter plot"), file=stderr() )
+
+dataTable = read.delim( dataFile, header=T, check.names=F )
+header    = colnames(dataTable) 
+gVar      = header[1]
+xVar      = header[2]
 
 # Get colors for plot from multiple selection
-colors = valuesHIS$colors
-colors = colors[1:length(legend)]
+colors     = valuesHIS$colors
+# Get colors for plot (last colors is for linear regression)
+nColors    = length(unique(dataTable[,gVar]))
+palette    = colorRampPalette( colors )( n=nColors )
 
-# Control plot margins and spacing between text lines
-par(
-	mai = c(
-		input$bottomMarHIS,
-		input$leftMarHIS,
-		input$upperMarHIS,
-		input$rightMarHIS
-	),
-	lheight = 0.8, # Inter-line spacing
-	ljoin   = 1,   # Square lines
-	lend    = 2,   # Square ends in lines
-	xaxs    = "i", # Style of X axis. "r": adds 4% spacing to each side; "i": no spacing added
-	yaxs    = "i", # Style of Y axis. "r": adds 4% spacing to each side; "i": no spacing added
-	xpd     = NA
-)
+# Main title and axis labels
+mTitle     = gsub( ":n:", "\n", input$titleHIS )
+xLabel     = gsub( ":n:", "\n", input$xLabelHIS )
+yLabel     = gsub( ":n:", "\n", input$yLabelHIS )
+mTitleSize = input$titleSizeHIS
+legendSize = input$legendSizeHIS
+labelSize  = input$labelSizeHIS
+scaleSize  = input$scaleSizeHIS
+textSize   = input$textSizeHIS/3
+lineWidth  = input$lineWidthHIS
+tickWidth  = lineWidth / 1.8
+colorAlpha = input$alphaHIS
+barBorder  = input$barBordersHIS
+binWidth   = input$binWidthHIS
 
-# Titles all around the plot
-title   = gsub( ":n:", "\n", input$titleHIS )
-y_label = gsub( ":n:", "\n", input$yLabelHIS )
-x_label = gsub( ":n:", "\n", input$xLabelHIS )
-
-border_color = NA
-
+# Histogram with or without bar borders
 if( input$barBordersHIS ){
-	border_color = '#000000'
-}
-
-# Get xmin and max values in both dimensions
-
-histogram = hist(
-	m_data,
-	breaks = input$numBinsHIS,
-	plot   = F
-)
-
-xmin = min( histogram$breaks )
-xmax = max( histogram$breaks )
-ymin = 0
-if( input$normalizeHIS ){	
-	ymax = max( histogram$density )
+	hist = ggplot( dataTable, aes_string( x=xVar, fill=gVar, color=gVar ))
 }else{
-	ymax = max( histogram$counts )
+	hist = ggplot( dataTable, aes_string( x=xVar, fill=gVar ))
 }
 
-if( !is.na(input$xMinHIS) ){
-	xmin = input$xMinHIS
+hist = hist +
+geom_histogram( aes( y=..density.. ), binwidth=binWidth, position="identity" ) +
+scale_color_manual( values=palette ) +
+scale_fill_manual( values=alpha(palette,colorAlpha) ) +
+labs(
+	title = mTitle
+)
+
+# Add lines
+#geom_vline( xintercept=0, linetype=2, size=lineWidth/4, color="grey50" ) +
+#geom_hline( yintercept=0, linetype=2, size=lineWidth/4, color="grey50" ) +
+
+# Density area
+if( input$densityHIS ){
+	hist = hist +
+	geom_density(alpha=colorAlpha*2/3)
 }
-if( !is.na(input$xMaxHIS) ){
-	xmax = input$xMaxHIS
+
+# Legend
+if( input$showLegendHIS ){
+	hist = hist +
+	theme(
+		legend.position = "right",
+		legend.title    = element_text( size=legendSize*1.2 )
+	)
+}else{
+	hist = hist +
+	theme(
+		legend.position ="none",
+		legend.title    = element_blank()
+	)
 }
-if( !is.na(input$yMinHIS) ){
-	ymin = input$yMinHIS
-}
-if( !is.na(input$yMaxHIS) ){
-	ymax = input$yMaxHIS
-}
 
-# Graph histogram
-par( xpd  = F )
-
-hist(
-	m_data,
-	breaks   = input$numBinsHIS,
-	freq     = !input$normalizeHIS,  # F: histogram has area of 1
-	axes     = F,
-	main     = title,
-	cex.main = input$titleSizeHIS,
-	col      = colors,
-	border   = border_color,
-	ylab     = NA,
-	xlab     = NA,
-	xlim     = c( xmin, xmax ),
-	ylim     = c( ymin, ymax )
+# Add theme
+hist = hist +
+theme(
+#	axis.text.x       = element_text( angle=90, vjust=0.5, hjust=1 ),
+	legend.text       = element_text( size=legendSize ),
+	legend.background = element_blank(),
+	legend.key        = element_blank(),
+	panel.background  = element_blank(),
+	axis.text         = element_text( size=scaleSize, face=1, hjust=0.5 ),
+	plot.title        = element_text( size=mTitleSize, face=2, hjust=0.5 ),
+	axis.title        = element_text( size=labelSize,  face=1, hjust=0.5 ),
+	panel.border      = element_rect( size=lineWidth, color="black", fill="transparent" ),
+	axis.ticks.length = unit( tickWidth/8, "cm" ),
+	axis.ticks        = element_line( size=tickWidth ),
+	plot.margin       = unit( c(0.2,0.1,0.1,0.1), "in" )
 )
 
-# Plot X axes
-axis(
-	1,
-	lwd      =  input$lineWidthHIS,
-	padj     =  input$xScalePosHIS,
-	cex.axis =  input$scaleSizeHIS
-)
+print(hist)
 
-# Plot Y axes
-axis(
-	2,
-	lwd      =  input$lineWidthHIS,
-#	padj     = -input$yScalePosHIS,
-	las      = 2,
-	cex.axis =  input$scaleSizeHIS
-)
-
-# Y-axis label
-text(
-	grconvertX( input$yYlabelHIS, from = "ndc", to = "user" ),
-	grconvertY( 0.50, from = "npc", to = "user" ),
-	adj   = c(0.5,1),
-	label = y_label,
-	xpd   = NA,
-	srt   = 90,
-	cex   = input$yLabelSizeHIS
-)
-
-# X-axis label
-text(
-	grconvertX( 0.50, from = "npc", to = "user" ),
-	grconvertY( input$xXlabelHIS, from = "ndc", to = "user" ),
-	adj   = c(0.5,0),
-	label = x_label,
-	xpd   = NA,
-	cex   = input$xLabelSizeHIS
-)
-
-# Add box around plot
-# "o" (the default), "l", "7", "c", "u", or "]"
-# "n" suppresses the box
-boxtypes = c('n','o','l','7','c','u',']')
-boxtype  = boxtypes[input$boxTypeHIS+1]
-
-box(
-	which = "plot",
-	bty   = boxtype,
-	lwd   = input$lineWidthHIS
-)
+write( paste("[HIS |",curDate,"|",sessionId,"] [ DONE ]"), file=stderr() )

@@ -90,8 +90,10 @@ if( input$showLinearFitSCA ){
 	equation = substitute(
 		target == a + b %.% input*";"~~r^2~"="~r2*";"~~p~"="~pvalue, 
 		list(
-			target = yVar,
-			input  = xVar,
+#			target = yVar,
+#			input  = xVar,
+			target = 'Y',
+			input  = 'X',
 			a      = format(as.vector(coef(m)[1]), digits = 2),
 			b      = format(as.vector(coef(m)[2]), digits = 2),
 			r2     = format(summary(m)$r.squared,  digits = 3),

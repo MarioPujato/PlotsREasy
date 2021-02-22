@@ -2,80 +2,58 @@
 		tabPanel( "Histogram",
 			sidebarLayout(
 				sidebarPanel(
-					h3(textOutput("tabHIS")),
+					h3("Histogram"),
+					br(),hr(),
+					h4("Data file:"),
+					fileInput( "dataFileHIS",  NULL, placeholder = "Select data file", accept = c("text/plain", "text/tab-separated-values", ".tsv", ".txt") ),
+					tags$script('$( "#dataFileHIS" ).on( "click", function() { this.value = null; });'),
+					checkboxInput( "exampleHIS", "Load example file", value = F ),
 					br(),
-					tabsetPanel(
-						tabPanel( "Input",
-							br(),
-							h4("Data file:"),
-							fileInput( "dataFileHIS",  NULL, placeholder = "Select data file", accept = c("text/plain", "text/tab-separated-values", ".tsv", ".txt") ),
-							tags$script('$( "#dataFileHIS" ).on( "click", function() { this.value = null; });'),
-							checkboxInput( "exampleHIS", "Load example file", value = F ),
-							br(),
-							hr(),
-							h4("Color Palette:"),
-							uiOutput("plotColorsHIS"),
-							br(),
-							fileInput( "colorFileHIS", NULL, placeholder = "Select file", accept = c("text/plain", "text/tab-separated-values", ".tsv", ".txt") ),
-							tags$script('$( "#colorFileHIS" ).on( "click", function() { this.value = null; });'),
-							uiOutput("paletteSelectorHIS")
-						),
-						tabPanel( "Options",
-							br(),
-							splitLayout(
-								h4("Dimensions:"),
-								numericInput( "widthHIS",  "Witdh",  value = 600, min = 300, max = 2400, step = 50 ),
-								numericInput( "heightHIS", "Height", value = 600, min = 300, max = 2400, step = 50 )
-							),
-							h4("Margins:"),
-							splitLayout(
-								numericInput( "bottomMarHIS", "Bottom", value = 1.0, min = 0, max = 10, step = 0.05 ),
-								numericInput( "leftMarHIS",   "Left"  , value = 1.0, min = 0, max = 10, step = 0.05 ),
-								numericInput( "upperMarHIS",  "Upper" , value = 1.0, min = 0, max = 10, step = 0.05 ),
-								numericInput( "rightMarHIS",  "Right" , value = 0.3, min = 0, max = 10, step = 0.05 )
-							),
-							h4("Main title and labels:"),
-							textInput( "titleHIS",  NULL, placeholder = "Main title here" ),
-							textInput( "xLabelHIS", NULL, placeholder = "X label here" ),
-							textInput( "yLabelHIS", NULL, placeholder = "Y label here" ),
-							splitLayout(
-								numericInput( "titleSizeHIS",  "Title size", value = 3.5, min = 0.1, max = 10, step = 0.05 ),
-								numericInput( "xLabelSizeHIS", "Xlab size",  value = 2.5, min = 0.1, max = 10, step = 0.05 ),
-								numericInput( "yLabelSizeHIS", "Ylab size",  value = 2.5, min = 0.1, max = 10, step = 0.05 ),
-								numericInput( "scaleSizeHIS",  "Scale size", value = 2.0, min = 0.5, max = 10, step = 0.1 )
-							),
-							splitLayout(
-								numericInput( "xXlabelHIS",   "Xlab pos",   value = 0.01, min = 0,   max = 1,  step = 0.01 ),
-								numericInput( "yYlabelHIS",   "Ylab pos",   value = 0.01, min = 0,   max = 1,  step = 0.01 ),
-								numericInput( "xScalePosHIS", "XScale pos", value = 0.3,  min = -10, max = 10, step = 0.02 ),
-								numericInput( "yScalePosHIS", "YScale pos", value = 0.0,  min = -10, max = 10, step = 0.02 )
-							),
-							splitLayout(
-								numericInput( "xMinHIS", "X min", value = "NULL" ),
-								numericInput( "xMaxHIS", "X max", value = "NULL" ),
-								numericInput( "yMinHIS", "Y min", value = "NULL" ),
-								numericInput( "yMaxHIS", "Y max", value = "NULL" )
-							),
-							h4("Options:"),
-							splitLayout(
-								checkboxInput( "barBordersHIS", "Bar borders",    value = F ),
-								checkboxInput( "normalizeHIS",  "Normalize area", value = F ),
-								"",
-								""
-							),
-							splitLayout(
-								numericInput( "numBinsHIS",   "Number of Bins", value = 20, min = 3,   max = 1000, step = 1   ),
-								numericInput( "lineWidthHIS", "Line width",     value = 4,  min = 0.5, max = 10,   step = 0.1 ),
-								numericInput( "boxTypeHIS",   "Box type",       value = 1,  min = 0,   max = 6,    step = 1   ),
-								""
-							)
-						),
-						tabPanel( "Help",
-							br(),
-							includeMarkdown( "lib/core.md" ),
-							br(),
-							includeMarkdown( "lib/histogram.md" )
-						)
+					hr(),
+					h4("Color Palette:"),
+					uiOutput("plotColorsHIS"),
+					br(),
+					tags$script('$( "#colorFileHIS" ).on( "click", function() { this.value = null; });'),
+					uiOutput("paletteSelectorHIS"),
+					fileInput( "colorFileHIS", NULL, placeholder = "Select file" ),
+					br(),hr(),
+					splitLayout(
+						h4("Dimensions:"),
+						numericInput( "widthHIS",  "Witdh",  value = 600, min = 300, max = 2400, step = 50 ),
+						numericInput( "heightHIS", "Height", value = 600, min = 300, max = 2400, step = 50 )
+					),
+					br(),hr(),
+					h4("Title:"),
+					textInput( "titleHIS",  NULL, placeholder = "Main title here" ),
+					splitLayout(
+						numericInput( "titleSizeHIS", "Title size", value = 30, min = 5, max = 50, step = 1 ),
+						numericInput( "labelSizeHIS", "Xlab size",  value = 25, min = 5, max = 50, step = 1 ),
+						"",""
+					),
+					br(),hr(),
+					h4("Scales:"),
+					splitLayout(
+						numericInput( "lineWidthHIS", "Line width", value = 4,  min = 0.5, max = 10, step = 0.1 ),
+						numericInput( "scaleSizeHIS", "Scale size", value = 20, min = 5,   max = 50, step = 1 ),
+						"",""
+					),
+					br(),hr(),
+					h4("Options:"),
+					splitLayout(
+						numericInput( "binWidthHIS", "Bin width", value = 0.05, min = 0, max = 1, step = 0.01 ),
+						"","",""
+					),
+					splitLayout(
+						checkboxInput( "barBordersHIS", "Bar borders",  value = F ),
+						checkboxInput( "densityHIS",    "Density area", value = F ),
+						numericInput(  "alphaHIS",      "Transparency", value = 1, min = 0, max = 1,  step = 0.1 )
+					),
+					br(),hr(),
+					h4("Legend:"),
+					splitLayout(
+						checkboxInput( "showLegendHIS", "Legend", value = F ),
+						numericInput(  "legendSizeHIS", "Size",   value = 15, min = 2, max = 30, step = 1 ),
+						"",""
 					)
 				),
 
@@ -93,9 +71,11 @@
 								hr(),
 								uiOutput("plotHIS")
 							),
-							tabPanel( "Log",
+							tabPanel( "Instructions",
 								br(),
-								"Nothing to display"
+								includeMarkdown( "lib/core.md" ),
+								br(),
+								includeMarkdown( "lib/histogram.md" )
 							)
 						)
 					)
@@ -111,8 +91,6 @@
 	})
 
 	valuesHIS = reactiveValues()
-
-	output$tabHIS = renderText({ input$plotTab })
 
 	output$plotHIS = renderUI({
 		plotOutput(
